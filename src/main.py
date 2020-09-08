@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, json, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
@@ -19,6 +19,30 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+todos = [
+        {"label": "Do a little dance", "done": False},
+        {"label": "Make a little love", "done": False}
+    ]
+
+@app.route('/todos', methods=['GET'])
+def hello_world():
+    request_body = jsonify(todos)
+    return request_body
+
+@app.route('/todos', methods=['POST'])
+def add_new_todo():
+    # request_body = request.data
+    decoded_object = json.loads(request.data)
+    todos.append(decoded_object)
+    print("Incoming request with the following body" , decoded_object)
+    return jsonify(todos)
+
+@app.route('/todos/<int:position>', methods=['DELETE'])
+def delete_todo(position):
+    todos.pop(position)
+    print("This is the item to delete:", position)
+    return jsonify(todos)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
