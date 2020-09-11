@@ -34,15 +34,19 @@ class Contact(db.Model):
         self.email = email
         self.address = address
         self.phone = phone
+    
+    def __repr__(self):
+        return '<Contact %r>' % self.full_nam
 
     def serialize(self):
         """returns a dictionary with data from the object"""
         return{
+            "id": self.id,
             "full name" : self.full_name,
             "email" : self.email,
             "address" : self.address,
             "phone" : self.phone
-            # "groups" : [subscriptions.serialize() for subscription in self.subscriptions]
+            # "groups" : [subscription.serialize() for subscription in self.subscriptions]
         }
     
     @classmethod
@@ -59,6 +63,13 @@ class Contact(db.Model):
             phone
         )
         return new_contact
+    
+    def update_contact(self, dictionary):
+        """updates properties of a specific instance of Contact"""
+        for (key, value) in dictionary.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        return True
 
 class Subscription(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -75,8 +86,7 @@ class Subscription(db.Model):
         return {
             "id" : self.id,
             "contact_id" : self.contact_id,
-            "group_id" : self.groupd_id,
-            "name" : self.contact.full_name
+            "group_id" : self.groupd_id
         }
 
 class Group(db.Model):
@@ -84,3 +94,32 @@ class Group(db.Model):
     group_name = db.Column(db.String(20), unique=True, nullable=False)
 
     subscriptions = db.relationship("Subscription", backref="groups")
+
+    def __init__(self, group_name):
+        self.group_name = group_name 
+
+    def __repr__(self):
+        return '<Group %r>' % self.name     
+
+    def serialize(self):
+        """returns a dictionary with data from the object"""
+        return {
+            "id" : self.id,
+            "group_name" : self.group_name,
+        }
+    @classmethod
+    def create_group(cls, group_name):
+        """
+            crea un objeto de la clase Group y devuelve la instancia creada.
+        """
+        new_group = cls(
+            group_name
+        )
+        return new_group
+    
+    def update_group(self, dictionary):
+        """updates properties of a specific instance of Group"""
+        for (key, value) in dictionary.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        return True
