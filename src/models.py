@@ -24,7 +24,8 @@ class Contact(db.Model):
     full_name = db.Column(db.String(80))
     email = db.Column(db.String(120), unique=True, nullable=False)
     address = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(20), unique=True, nullable=False) 
+    phone = db.Column(db.String(20), unique=True, nullable=False)
+    subscriptions = db.relationship("Subscription", backref="contact")  
 
     # subscriptions = db.relationship("Subscription", backref="contact")
 
@@ -45,8 +46,8 @@ class Contact(db.Model):
             "full name" : self.full_name,
             "email" : self.email,
             "address" : self.address,
-            "phone" : self.phone
-            # "groups" : [subscription.serialize() for subscription in self.subscriptions]
+            "phone" : self.phone,
+            "groups": [subscription.group_id for subscription in self.subscriptions]
         }
     
     @classmethod
@@ -80,6 +81,9 @@ class Subscription(db.Model):
         """creates an instance of this class"""
         self.contact_id = contact_id
         self.group_id = group_id
+    
+    def __repr__(self):
+        return '<Subscription %r>' % self.group_id 
 
     def serialize(self):
         """returns a dictionary with data from the object"""
